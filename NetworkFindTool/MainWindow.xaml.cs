@@ -25,13 +25,15 @@ namespace NetworkFindTool
     public partial class MainWindow : Window
     {
         /*Todo 
-            1. oznamit uzivateli ze probiha pokus o ping 
+            ✔ 1. oznamit uzivateli ze probiha pokus o ping 
             2. oznamit uzivateli ze se ping povedl a ze se pokousi ziskat to info
             3. refactor the validate function to also validate host format before tring to ping 
             4. validate host exist n thsi switch 
             5. ui for result page 
             6. get result into result page 
             7. if host credentials left blank show all hosts 
+            8. pokud kdekoli v prubehu failne premenovat button spatky na Submit 
+            9. -||- po suceedu
          
          */
         bool IsSwitchInputValid = false;
@@ -90,15 +92,16 @@ namespace NetworkFindTool
             byte[] buffer = Encoding.ASCII.GetBytes(data);
             int timeout = 120;
             PingReply reply = pingSender.Send(SwitchInput.Text, timeout, buffer, options);
-            // 1
+            SubmitButton.Content = "Pinging switch ...";
             if (reply.Status == IPStatus.Success)
             {
                 IsSwitchValid = true;
-                //2
+                SubmitButton.Content = "Fetching info ...";
             }
             else
             {
                 MessageBox.Show("Cannot ping switch", "Ping error", MessageBoxButton.OK, MessageBoxImage.Error);
+                SubmitButton.Content = "Submit";
             }
         }
 
