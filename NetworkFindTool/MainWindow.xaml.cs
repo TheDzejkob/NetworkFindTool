@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Net.NetworkInformation;
 
 namespace NetworkFindTool
 {
@@ -22,7 +24,13 @@ namespace NetworkFindTool
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool isIpOrHostname = false;
+        /*Todo 
+            1. oznamit uzivateli ze probiha pokus o ping 
+            2. oznamit uzivateli ze se ping povedl a ze se pokousi ziskat to info
+         
+         */
+        bool IsSwitchInputValid = false;
+        bool IsSwitchValid = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -56,14 +64,41 @@ namespace NetworkFindTool
             string text = SwitchInput.Text;
             if (IsIPv4(text) || IsHostname(text))
             {
-                isIpOrHostname = true;
+                IsSwitchInputValid = true;
+                IsServerUp();
+            }
+            else
+            {
+                IsSwitchInputValid = false;
+                MessageBox.Show("Invalid Switch info format 💀","User error", MessageBoxButton.OK,MessageBoxImage.Error);
+            }
+        }
+
+        public void IsServerUp()
+        {
+            Ping pingSender = new Ping();
+            PingOptions options = new PingOptions();
+
+            options.DontFragment = true;
+
+            string data = "U up man?";
+            byte[] buffer = Encoding.ASCII.GetBytes(data);
+            int timeout = 120;
+            PingReply reply = pingSender.Send(SwitchInput.Text, timeout, buffer, options);
+            // 1
+            if (reply.Status == IPStatus.Success)
+            {
+                IsSwitchValid = true;
+            }
+            else
+            {
+                MessageBox.Show()
             }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             ValidateSwitch();
-            
         }
     }
 }
