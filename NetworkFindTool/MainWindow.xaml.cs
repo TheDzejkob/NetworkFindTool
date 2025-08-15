@@ -27,6 +27,11 @@ namespace NetworkFindTool
         /*Todo 
             1. oznamit uzivateli ze probiha pokus o ping 
             2. oznamit uzivateli ze se ping povedl a ze se pokousi ziskat to info
+            3. refactor the validate function to also validate host format before tring to ping 
+            4. validate host exist n thsi switch 
+            5. ui for result page 
+            6. get result into result page 
+            7. if host credentials left blank show all hosts 
          
          */
         bool IsSwitchInputValid = false;
@@ -89,10 +94,11 @@ namespace NetworkFindTool
             if (reply.Status == IPStatus.Success)
             {
                 IsSwitchValid = true;
+                //2
             }
             else
             {
-                MessageBox.Show()
+                MessageBox.Show("Cannot ping switch", "Ping error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
