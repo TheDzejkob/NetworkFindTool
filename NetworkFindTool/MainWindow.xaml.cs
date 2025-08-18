@@ -175,8 +175,8 @@ namespace NetworkFindTool
                         client.Disconnect();
                     }
 
-                    // Debug: Save the raw output to see what we're actually getting
-                    MessageBox.Show($"Debug - show int status output:\n{intStatusOutput.Substring(0, Math.Min(500, intStatusOutput.Length))}...", "Debug", MessageBoxButton.OK);
+                    //// Debug: Save the raw output to see what we're actually getting
+                    //MessageBox.Show($"Debug - show int status output:\n{intStatusOutput.Substring(0, Math.Min(500, intStatusOutput.Length))}...", "Debug", MessageBoxButton.OK);
 
                     // Parse show int status
                     var intStatusDict = new Dictionary<string, (string Name, string Status)>();
