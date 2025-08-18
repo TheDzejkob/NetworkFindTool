@@ -25,7 +25,14 @@ namespace NetworkFindTool
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {s
+    {   
+        //TODO 
+            /* 
+             1. design the result
+             2. design the credential 
+             3. format the data
+             4. executable and build zip
+             */
 
         bool IsSwitchInputValid = false;
         bool IsSwitchValid = false;
