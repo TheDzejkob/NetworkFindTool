@@ -25,19 +25,8 @@ namespace NetworkFindTool
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
-        /*Todo 
-            ✔ 1. oznamit uzivateli ze probiha pokus o ping 
-            ✔ 2. oznamit uzivateli ze se ping povedl a ze se pokousi ziskat to info 
-            3. refactor the validate function to also validate host format before tring to ping 
-            4. validate host exist n thsi switch 
-            5. ui for result page 
-            6. get result into result page 
-            7. if host credentials left blank show all hosts 
-            8. pokud kdekoli v prubehu failne premenovat button spatky na Submit 
-            9. -||- po suceedu
-         
-         */
+    {s
+
         bool IsSwitchInputValid = false;
         bool IsSwitchValid = false;
         public MainWindow()
