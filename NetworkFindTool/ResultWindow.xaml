@@ -1,7 +1,7 @@
 ﻿<Window x:Class="NetworkFindTool.ResultWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Switch Host Results" Height="350" Width="600" Background="#232946">
+        Title="Switch Host Results" Height="400" Width="900" Background="#232946" Icon="icon.ico">
     <Window.Resources>
         <Style x:Key="CustomDataGridColumnHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#b8c1ec"/>
@@ -31,11 +31,13 @@
                   ColumnHeaderHeight="32"
                   ColumnHeaderStyle="{StaticResource CustomDataGridColumnHeader}">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="4*"/>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="4*"/>
+                <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="4*"/>
                 <DataGridTextColumn Header="IP Address" Binding="{Binding Ip}" Width="8*"/>
                 <DataGridTextColumn Header="Age (mins)" Binding="{Binding Age}" Width="4*"/>
                 <DataGridTextColumn Header="MAC Address" Binding="{Binding Mac}" Width="8*"/>
                 <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="3*"/>
-                <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="4*"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

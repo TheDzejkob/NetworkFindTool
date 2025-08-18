@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetworkFindTool"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="300" ResizeMode="NoResize">
+        Title="MainWindow" Height="600" Width="300" ResizeMode="NoResize" Icon="icon.ico">
 
     <Window.Resources>
         <Style x:Key="PlaceholderTextBoxStyle" TargetType="TextBox">
