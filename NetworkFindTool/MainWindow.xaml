@@ -48,9 +48,9 @@
             <RowDefinition Height="68*"/>
             <RowDefinition Height="20*"/>
         </Grid.RowDefinitions>
-        
-        
-        
+
+
+
         <Label FontSize="8" HorizontalAlignment="Center" Foreground="#b8c1ec">NetworkFindTool</Label>
 
 
@@ -67,7 +67,7 @@
         </TextBox>
 
 
-        
+
         <!-- Host -->
         <Label Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#fffffe" FontWeight="Bold" FontSize="20">Host Side</Label>
 
@@ -90,13 +90,15 @@
 
 
 
-        <Button x:Name="SubmitButton" Grid.Row="13"  BorderBrush="Transparent" Margin="15,0" Background="#eebbc3" Foreground="#232946" FontSize="20" FontWeight="Bold" Click="Button_Click" > Submit 
+        <Button x:Name="SubmitButton" Grid.Row="13"  BorderBrush="Transparent" Margin="15,0" Background="#eebbc3" Foreground="#232946" FontSize="20" FontWeight="Bold" Click="Button_Click" >Submit
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="10"/>
                 </Style>
             </Button.Resources>
         </Button>
-        
+
+
+
     </Grid>
 </Window>
