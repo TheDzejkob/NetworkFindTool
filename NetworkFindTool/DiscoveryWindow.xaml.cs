@@ -2,6 +2,7 @@ using Renci.SshNet;
 using Renci.SshNet.Common;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net; // DNS resolve
 using System.Text; // StringBuilder
@@ -22,12 +23,18 @@ namespace NetworkFindTool
         public string SelectedIp { get; private set; }
         private bool _discovering;
 
+        // Procedurální seznam pro UI
+        private readonly ObservableCollection<DiscoveredDevice> _devices = new();
+
         public DiscoveryWindow()
         {
             InitializeComponent();
             var creds = CredentialStore.Load();
             UsernameTextBox.Text = creds.Username;
             PasswordBox.Password = creds.Password;
+
+            // Napojení UI na kolekci
+            DevicesListBox.ItemsSource = _devices;
         }
 
         private async void DiscoverButton_Click(object sender, RoutedEventArgs e)
@@ -35,7 +42,7 @@ namespace NetworkFindTool
             if (_discovering) return;
             _discovering = true;
 
-            DevicesListBox.ItemsSource = null;
+            _devices.Clear();
             StatusText.Text = "Discovering ...";
             DiscoverButton.IsEnabled = false;
 
@@ -43,7 +50,7 @@ namespace NetworkFindTool
             string user = UsernameTextBox.Text?.Trim();
             string pass = PasswordBox.Password;
             string enablePass = null;
-            try { enablePass = EnablePasswordBox.Password; } catch { }
+            try { enablePass = EnablePasswordBox.Password; } catch { /* optional */ }
 
             if (string.IsNullOrWhiteSpace(start) || string.IsNullOrWhiteSpace(user))
             {
@@ -54,15 +61,24 @@ namespace NetworkFindTool
                 return;
             }
 
+            // Progress -> pøidává zaøízení hned pøi objevení (na UI vláknì)
+            var progress = new Progress<DiscoveredDevice>(dev =>
+            {
+                if (dev == null || string.IsNullOrWhiteSpace(dev.Ip)) return;
+                var exists = _devices.Any(d => string.Equals(d.Ip, dev.Ip, StringComparison.OrdinalIgnoreCase));
+                if (!exists)
+                {
+                    _devices.Add(dev);
+                    StatusText.Text = $"Found {_devices.Count} devices";
+                }
+            });
+
             try
             {
-                var devices = await Task.Run(() => DiscoverTopology(start, user, pass, enablePass));
-                DevicesListBox.ItemsSource = devices
-                    .GroupBy(d => d.Ip)
-                    .Select(g => g.First())
-                    .OrderBy(d => d.Ip)
-                    .ToList();
-                StatusText.Text = $"Found {((System.Collections.IList)DevicesListBox.ItemsSource).Count} devices";
+                // Spustí discovery, které prùbìžnì reportuje do progress
+                var finalList = await Task.Run(() => DiscoverTopology(start, user, pass, enablePass, progress));
+                // Finální status (UI už je naplnìné prùbìžnì)
+                StatusText.Text = $"Done. Found {_devices.Count} devices";
             }
             catch (Exception ex)
             {
@@ -100,7 +116,13 @@ namespace NetworkFindTool
             UseSelectedButton_Click(sender, e);
         }
 
-        private List<DiscoveredDevice> DiscoverTopology(string startIp, string username, string password, string enablePassword)
+        // Procedurální discovery: reportuje nalezené zaøízení pøes IProgress hned po zjištìní
+        private List<DiscoveredDevice> DiscoverTopology(
+            string startIp,
+            string username,
+            string password,
+            string enablePassword,
+            IProgress<DiscoveredDevice> progress)
         {
             var devices = new Dictionary<string, DiscoveredDevice>(StringComparer.OrdinalIgnoreCase);
             var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -132,13 +154,15 @@ namespace NetworkFindTool
                     RunOnShell(shell, "screen-length disable", TimeSpan.FromSeconds(5));
                     RunOnShell(shell, "screen-length 0 temporary", TimeSpan.FromSeconds(5));
 
+                    // Nalezené aktuální zaøízení -> hned reportnout
                     string name = GetDeviceName(shell);
-
                     visited.Add(ip);
-                    devices[ip] = new DiscoveredDevice { Ip = ip, Name = name };
+                    var self = new DiscoveredDevice { Ip = ip, Name = name };
+                    devices[ip] = self;
+                    progress?.Report(self);
 
+                    // Získat sousedy
                     var neighbors = new List<(string ip, string name)>();
-
                     var cdpDetail = RunOnShell(shell, "show cdp neighbors detail", TimeSpan.FromSeconds(30));
                     if (!string.IsNullOrWhiteSpace(cdpDetail))
                         neighbors.AddRange(ParseCdpNeighbors(cdpDetail));
@@ -168,7 +192,7 @@ namespace NetworkFindTool
                             neighbors.AddRange(ParseLldpNeighbors(lldpHuawei));
                     }
 
-                    // DNS resolve fallback when only name is present
+                    // DNS fallback pro jména bez IP
                     var resolved = new List<(string ip, string name)>();
                     foreach (var n in neighbors)
                     {
@@ -185,13 +209,18 @@ namespace NetworkFindTool
                         }
                     }
 
+                    // Procedurálnì pøidávej a frontuj
                     foreach (var n in resolved)
                     {
                         if (string.IsNullOrWhiteSpace(n.ip)) continue;
-                        if (IPMatchSelf(n.ip, ip)) continue; // avoid re-adding self
+                        if (IPMatchSelf(n.ip, ip)) continue;
 
                         if (!devices.ContainsKey(n.ip))
-                            devices[n.ip] = new DiscoveredDevice { Ip = n.ip, Name = n.name };
+                        {
+                            var dev = new DiscoveredDevice { Ip = n.ip, Name = n.name };
+                            devices[n.ip] = dev;
+                            progress?.Report(dev); // hned pøidej do UI
+                        }
 
                         if (!visited.Contains(n.ip) && !enqueued.Contains(n.ip))
                         {
@@ -205,7 +234,7 @@ namespace NetworkFindTool
                 }
                 catch
                 {
-                    // Skip unreachable/unauthorized devices and continue
+                    // Pokraèovat dál
                 }
             }
 
@@ -229,12 +258,10 @@ namespace NetworkFindTool
             catch { return null; }
         }
 
+        // --- Shell helpers (beze zmìn) ---
         private static ShellStream OpenShell(SshClient client)
         {
-            var modes = new Dictionary<TerminalModes, uint>
-            {
-                { TerminalModes.ECHO, 0 }
-            };
+            var modes = new Dictionary<TerminalModes, uint> { { TerminalModes.ECHO, 0 } };
             return client.CreateShellStream("xterm", 80, 24, 800, 600, 1024 * 16, modes);
         }
 
@@ -242,17 +269,11 @@ namespace NetworkFindTool
         {
             var end = DateTime.UtcNow + timeout;
             var sb = new StringBuilder();
-
             shell.Write("\n");
             while (DateTime.UtcNow < end)
             {
                 System.Threading.Thread.Sleep(50);
-                while (shell.DataAvailable)
-                {
-                    var chunk = shell.Read();
-                    sb.Append(chunk);
-                }
-
+                while (shell.DataAvailable) sb.Append(shell.Read());
                 var lastLine = GetLastNonEmptyLine(sb.ToString());
                 if (LooksLikePrompt(lastLine)) return;
             }
@@ -276,11 +297,7 @@ namespace NetworkFindTool
             while (DateTime.UtcNow < end)
             {
                 System.Threading.Thread.Sleep(50);
-                while (shell.DataAvailable)
-                {
-                    var chunk = shell.Read();
-                    sb.Append(chunk);
-                }
+                while (shell.DataAvailable) sb.Append(shell.Read());
                 var text = sb.ToString();
                 var lastLine = GetLastNonEmptyLine(text);
                 if (LooksLikePrompt(lastLine)) return;
@@ -294,11 +311,7 @@ namespace NetworkFindTool
                     while (DateTime.UtcNow < end2)
                     {
                         System.Threading.Thread.Sleep(50);
-                        while (shell.DataAvailable)
-                        {
-                            var chunk2 = shell.Read();
-                            sb2.Append(chunk2);
-                        }
+                        while (shell.DataAvailable) sb2.Append(shell.Read());
                         var last2 = GetLastNonEmptyLine(sb2.ToString());
                         if (LooksLikePrompt(last2)) return;
                     }
@@ -319,14 +332,11 @@ namespace NetworkFindTool
             while (DateTime.UtcNow < end)
             {
                 System.Threading.Thread.Sleep(30);
-                while (shell.DataAvailable)
-                {
-                    var chunk = shell.Read();
-                    sb.Append(chunk);
-                }
+                while (shell.DataAvailable) sb.Append(shell.Read());
 
                 var text = sb.ToString();
 
+                // ošetøení stránkování
                 if (ContainsMorePrompt(text))
                 {
                     if (moreKickCount++ < 200)
@@ -362,7 +372,6 @@ namespace NetworkFindTool
         private static bool ContainsMorePrompt(string text)
         {
             if (string.IsNullOrEmpty(text)) return false;
-            // Common patterns across vendors
             if (text.Contains("--More--", StringComparison.OrdinalIgnoreCase)) return true;
             if (Regex.IsMatch(text, @"(?i)<-+\s*More\s*-+>")) return true;
             if (Regex.IsMatch(text, @"(?i)Press\s+(any|SPACE)\s+key\s+to\s+continue")) return true;
