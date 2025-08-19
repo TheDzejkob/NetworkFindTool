@@ -44,8 +44,7 @@
             </PasswordBox.Resources>
         </PasswordBox>
 
-        <Label Grid.Row="3" Grid.Column="0" Content="Enable password (optional):" Margin="0,0,8,8" VerticalAlignment="Center" Foreground="#fffffe" FontWeight="Bold" FontSize="14"/>
-        <PasswordBox x:Name="EnablePasswordBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,8" FontSize="16" Background="#b8c1ec" Foreground="#232946">
+        <PasswordBox Visibility="Collapsed" x:Name="EnablePasswordBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,8" FontSize="16" Background="#b8c1ec" Foreground="#232946">
             <PasswordBox.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="10"/>
