@@ -424,6 +424,22 @@ namespace NetworkFindTool
             ValidateSwitch();
         }
 
+        private void PickFromListButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new DiscoveryWindow { Owner = this };
+            if (!string.IsNullOrWhiteSpace(SwitchInput.Text))
+            {
+                dlg.StartAddressTextBox.Text = SwitchInput.Text;
+            }
+            if (dlg.ShowDialog() == true)
+            {
+                if (!string.IsNullOrWhiteSpace(dlg.SelectedIp))
+                {
+                    SwitchInput.Text = dlg.SelectedIp;
+                }
+            }
+        }
+
         private class PortComparer : IComparer<IEnumerable<int>>
         {
             public int Compare(IEnumerable<int> x, IEnumerable<int> y)

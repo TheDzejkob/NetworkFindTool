@@ -58,7 +58,7 @@
         <Label Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#fffffe" FontWeight="Bold" FontSize="20">Switch Side</Label>
 
         <Label Grid.Row="2" VerticalAlignment="Center"  Margin="15,0,0,0" Foreground="#b8c1ec" FontWeight="DemiBold">IP/Hostname</Label>
-        <Button x:Name="PickFromListButton" Grid.Row="2"  BorderBrush="Transparent" Margin="180,2,15,2" Background="#eebbc3" Foreground="#232946" FontSize="12" FontWeight="Bold" >Pick from list
+        <Button x:Name="PickFromListButton" Grid.Row="2"  BorderBrush="Transparent" Margin="180,2,15,2" Background="#eebbc3" Foreground="#232946" FontSize="12" FontWeight="Bold" Click="PickFromListButton_Click">Pick from list
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="10"/>
