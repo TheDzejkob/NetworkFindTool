@@ -78,3 +78,9 @@ Poznámka: Některé CLI výpisy vyžadují privilegovaný mód. Aplikace se o n
 - Přihlašovací údaje se používají pouze k připojení přes SSH. Ujistěte se, že jsou přenášeny v bezpečné síti.
 - Upravte logování dle zásad vaší organizace (v projektu se neukládají citlivé výstupy).
 
+## ScreenShots
+ -main screen
+<img width="286" height="588" alt="image" src="https://github.com/user-attachments/assets/63a9d9d7-4ee9-4bc1-b6ef-5a45db250989" />
+-switch discover
+<img width="496" height="544" alt="image" src="https://github.com/user-attachments/assets/99cca30b-672f-486e-8e6e-7d41ffecd10c" />
+
