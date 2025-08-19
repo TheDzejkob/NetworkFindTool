@@ -315,6 +315,7 @@ namespace NetworkFindTool
                               .Replace(".", "")
                               .ToUpper();
                 }
+                
 
                 // 🔽 Apply filters only if user typed something
                 if (!string.IsNullOrWhiteSpace(HostIpInput.Text))
@@ -416,7 +417,7 @@ namespace NetworkFindTool
             }
             SubmitButton.Content = "Submit";
         }
-
+        
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
